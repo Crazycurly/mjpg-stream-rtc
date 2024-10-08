@@ -1,0 +1,23 @@
+services:
+  mjpg-streamer:
+    build:
+      context: .
+    restart: always
+    image: crazycurly/mjpg-streamer
+    environment:
+      - ENV_RESOLUTION=1280x720
+      - ENV_FPS=30
+      - ENV_CAMERA=/dev/video0
+    devices:
+      - /dev/video0
+    ports:
+      - 8080:8080
+  go2rtc:
+    image: alexxit/go2rtc
+    network_mode: host       # important for WebRTC, HomeKit, UDP cameras
+    privileged: true         # only for FFmpeg hardware transcoding
+    restart: unless-stopped  # autorestart on fail or config change from WebUI
+    environment:
+      - TZ=Asia/Taipei  # timezone in logs
+    volumes:
+      - "./:/config"   # folder for go2rtc.yaml file (edit from WebUI)
